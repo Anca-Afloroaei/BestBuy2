@@ -47,3 +47,51 @@ class Product:
         if self.quantity == 0:
             self.deactivate()
         return self.price * quantity
+
+
+
+class NonStockedProduct(Product):
+    """
+    A special type of product that is not tracked by quantity (e.g., digital/non-physical products).
+    Always shows quantity as 0 and cannot modify quantity.
+    Example: Software licenses.
+    """
+
+    def __init__(self, name, price):
+        super().__init__(name, price, quantity=0)
+
+    def set_quantity(self, quantity):
+        """Prevents changing the quantity for non-stocked products."""
+        pass  # Quantity remains 0
+
+    def get_quantity(self):
+        return 0
+
+    def buy(self, quantity):
+        """Allows purchases without affecting quantity."""
+        if not self.active:
+            raise Exception(f"Product '{self.name}' is not active.")
+        return self.price * quantity
+
+    def show(self) -> str:
+        return f"{self.name} (Non-Stocked), Price: {self.price}"
+
+
+class LimitedProduct(Product):
+    """
+    A product with a per-order purchase limit (e.g., shipping fee - only once per order).
+    """
+
+    def __init__(self, name, price, quantity, maximum):
+        super().__init__(name, price, quantity)
+        self.maximum = maximum
+
+    def buy(self, quantity):
+        """Overrides base buy method to enforce a maximum quantity per order."""
+        if quantity > self.maximum:
+            raise Exception(f"Cannot buy more than {self.maximum} of '{self.name}' in one order.")
+        return super().buy(quantity)
+
+    def show(self) -> str:
+        return f"{self.name} (Limited to {self.maximum} per order), Price: {self.price}, Quantity: {self.quantity}"
+
